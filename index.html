@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="pt-br" data-bs-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sensor de Estacionamento (PPCP) — Material Didático</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --brand:#1e88e5; --brand-2:#00bfa6; --brand-3:#455a64; --bg-soft:#f6fbff;
+      --ok:#2e7d32; --warn:#ef6c00; --err:#c62828;
+    }
+    html,body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg-soft)}
+    .hero{background:linear-gradient(135deg,rgba(30,136,229,.12),rgba(0,191,166,.10));border-bottom:1px solid #e6f0ff}
+    .badge-soft{background:rgba(30,136,229,.10);color:var(--brand);border:1px solid rgba(30,136,229,.25)}
+    .card{border:0;box-shadow:0 10px 30px rgba(10,50,100,.06);border-radius:1rem}
+    .step-dot{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:var(--brand);color:#fff;font-weight:800}
+    .table thead th{background:#e8f3ff;color:#0b3c74}
+    .qual-mid{color:var(--warn);font-weight:600}
+    .qual-final{color:var(--ok);font-weight:700}
+    .fade-unit{opacity:0;transition:opacity .45s ease}
+    .fade-unit.show{opacity:1}
+    .fade-swap{opacity:0;transition:opacity .35s ease}
+    .fade-swap.show{opacity:1}
+    .btn-pill{border-radius:999px}
+    .timeline{position:relative;padding-left:1.25rem}
+    .timeline::before{content:"";position:absolute;left:.4rem;top:.1rem;bottom:.1rem;width:4px;background:linear-gradient(var(--brand),var(--brand-2));border-radius:4px}
+    .timeline .tl{position:relative;margin-left:1rem;margin-bottom:1rem}
+    .timeline .tl::before{content:"";position:absolute;left:-1.05rem;top:.4rem;width:.8rem;height:.8rem;background:#fff;border:3px solid var(--brand);border-radius:999px}
+    .mini-chip{border:1px dashed #9ecbff;background:#f2f8ff;padding:.15rem .5rem;border-radius:.75rem;font-size:.85rem}
+    .img-frame{border-radius:1rem;border:1px solid #e9f2fb}
+    .kbd{background:#0b3c74;color:#fff;padding:.2rem .45rem;border-radius:.4rem;font-size:.85rem}
+  </style>
+</head>
+<body>
+<header class="hero py-4 mb-4">
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-between">
+      <div>
+        <span class="badge badge-soft me-2">PPCP</span>
+        <span class="badge bg-success-subtle text-success">Didático</span>
+      </div>
+      <nav class="d-flex gap-2">
+        <a class="btn btn-outline-primary btn-sm btn-pill" href="#passoapasso">Passo a passo</a>
+        <a class="btn btn-outline-primary btn-sm btn-pill" href="#arvore">Árvore</a>
+        <a class="btn btn-outline-primary btn-sm btn-pill" href="#sequenciamento">Sequenciamento</a>
+        <a class="btn btn-outline-primary btn-sm btn-pill" href="#qualidade">Qualidade</a>
+        <a class="btn btn-primary btn-sm btn-pill" href="#mrp">MRP & Custos</a>
+      </nav>
+    </div>
+
+    <div class="row align-items-center mt-4">
+      <div class="col-lg-7">
+        <h1 class="fw-bold text-primary">Sensor de Estacionamento 🚗🔊</h1>
+        <p class="lead mb-3">Projeto Arduíno para ensinar <strong>Mapeamento de Processos</strong>: montar, programar, testar e controlar qualidade como numa mini-linha de produção.</p>
+        <div class="d-flex gap-3 flex-wrap">
+          <div class="mini-chip">Quadro → Fluxo → CQ</div>
+          <div class="mini-chip">Tempos & Percentuais</div>
+          <div class="mini-chip">Checklist de Verificação</div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <!-- caminho ajustado -->
+        <img src="esquematico.png" class="img-fluid img-frame fade-unit" alt="Esquemático do circuito">
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="container pb-5">
+
+  <!-- PASSO A PASSO -->
+  <section id="passoapasso" class="mb-5 fade-unit">
+    <div class="d-flex align-items-center mb-3">
+      <span class="step-dot me-2">1</span>
+      <h2 class="m-0">Montagem — Passo a passo 🛠️</h2>
+    </div>
+
+    <!-- BOM: TABELA com quantidades -->
+    <div class="row g-3">
+      <div class="col-lg-12">
+        <div class="card p-3">
+          <h6 class="text-uppercase text-muted mb-2">Materiais (BOM) 📦</h6>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead>
+                <tr><th>Item</th><th>Quantidade</th><th>Observações</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Arduino Uno R3 + cabo USB</td><td>1 un</td><td>Placa de controle e alimentação via USB</td></tr>
+                <tr><td>Sensor ultrassônico HC-SR04</td><td>1 un</td><td>Trig: D3 • Echo: D2</td></tr>
+                <tr><td>Buzzer passivo 5V</td><td>1 un</td><td>Pino D9 (+) • GND (−)</td></tr>
+                <tr><td>LED vermelho</td><td>1 un</td><td>Indica “perigo/curta distância”</td></tr>
+                <tr><td>LED verde</td><td>1 un</td><td>Indica “livre/seguro”</td></tr>
+                <tr><td>Resistores 220–330Ω</td><td>2 un</td><td>Limitadores dos LEDs</td></tr>
+                <tr><td>Breadboard</td><td>1 un</td><td>Montagem sem solda</td></tr>
+                <tr><td>Jumpers macho–macho (kit)</td><td>1 kit</td><td>Fios de ligação</td></tr>
+                <tr><td>Notebook com Arduino IDE e sketch <code>.ino</code></td><td>1 un</td><td>Para upload e calibração</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ligações -->
+    <div class="row g-3 mt-1">
+      <div class="col-lg-12">
+        <div class="card p-3">
+          <h6 class="text-uppercase text-muted mb-2">Pinos e ligações 🔌</h6>
+          <ul class="mb-0">
+            <li>HC-SR04: Vcc(5V), GND(GND), Trig(D3), Echo(D2)</li>
+            <li>LED verde → pino D7 (com resistor) → GND</li>
+            <li>LED vermelho → pino D8 (com resistor) → GND</li>
+            <li>Buzzer → pino D9 (+) e GND (–)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ÁRVORE DE PRODUTO (entre Passo a passo e Sequenciamento) -->
+  <section id="arvore" class="mb-5 fade-unit">
+    <div class="d-flex align-items-center mb-3">
+      <span class="step-dot me-2">1.1</span>
+      <h2 class="m-0">Árvore de Produto (BOM em níveis) 🌳</h2>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-lg-7">
+        <div class="card p-3">
+          <p class="text-muted mb-2">Estrutura hierárquica do conjunto “Sensor de Estacionamento”. O nível indica a distância do produto final.</p>
+
+          <ul class="list-unstyled ps-2">
+            <li class="mb-2">
+              <span class="badge bg-primary">Nível 0</span>
+              <strong class="ms-1">Conjunto: Sensor de Estacionamento</strong> 🚗🔊
+              <ul class="list-unstyled ps-4 mt-2">
+                <li class="mb-2">
+                  <span class="badge bg-info-subtle text-info">Nível 1</span>
+                  Arduino Uno R3 + cabo USB (1 un)
+                </li>
+                <li class="mb-2">
+                  <span class="badge bg-info-subtle text-info">Nível 1</span>
+                  Sensor ultrassônico HC-SR04 (1 un)
+                </li>
+                <li class="mb-2">
+                  <span class="badge bg-info-subtle text-info">Nível 1</span>
+                  Buzzer passivo 5V (1 un)
+                </li>
+                <li class="mb-2">
+                  <span class="badge bg-info-subtle text-info">Nível 1</span>
+                  Sinalização por LEDs (subconjunto)
+                  <ul class="list-unstyled ps-4 mt-2">
+                    <li>
+                      <span class="badge bg-success-subtle text-success">Nível 2</span>
+                      LED vermelho (1 un) + Resistor 220–330Ω (1 un)
+                    </li>
+                    <li class="mt-1">
+                      <span class="badge bg-success-subtle text-success">Nível 2</span>
+                      LED verde (1 un) + Resistor 220–330Ω (1 un)
+                    </li>
+                  </ul>
+                </li>
+                <li class="mb-2">
+                  <span class="badge bg-info-subtle text-info">Nível 1</span>
+                  Interligação e montagem
+                  <ul class="list-unstyled ps-4 mt-2">
+                    <li><span class="badge bg-success-subtle text-success">Nível 2</span> Breadboard (1 un)</li>
+                    <li class="mt-1"><span class="badge bg-success-subtle text-success">Nível 2</span> Jumpers macho–macho (1 kit)</li>
+                    <li class="mt-1"><span class="badge bg-success-subtle text-success">Nível 2</span> Cabo USB (1 un)</li>
+                  </ul>
+                </li>
+                <li class="mb-2">
+                  <span class="badge bg-info-subtle text-info">Nível 1</span>
+                  Software (sketch <code>.ino</code>) — upload via Arduino IDE (1 un)
+                  <ul class="list-unstyled ps-4 mt-2">
+                    <li><span class="badge bg-success-subtle text-success">Nível 2</span> Notebook com Arduino IDE (1 un)</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+
+        </div>
+      </div>
+
+      <!-- Tabela resumo por níveis -->
+      <div class="col-lg-5">
+        <div class="card p-3">
+          <h6 class="text-uppercase text-muted mb-2">Resumo por níveis</h6>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead>
+                <tr><th>Nível</th><th>Item</th><th>Qtde</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>0</td><td>Conjunto final</td><td>1</td></tr>
+                <tr><td>1</td><td>Arduino Uno R3 + cabo</td><td>1</td></tr>
+                <tr><td>1</td><td>HC-SR04</td><td>1</td></tr>
+                <tr><td>1</td><td>Buzzer 5V</td><td>1</td></tr>
+                <tr><td>1</td><td>Subconjunto LEDs</td><td>1</td></tr>
+                <tr><td>2</td><td>LED vermelho + Resistor</td><td>1 + 1</td></tr>
+                <tr><td>2</td><td>LED verde + Resistor</td><td>1 + 1</td></tr>
+                <tr><td>1</td><td>Interligação/montagem</td><td>—</td></tr>
+                <tr><td>2</td><td>Breadboard</td><td>1</td></tr>
+                <tr><td>2</td><td>Jumpers (kit)</td><td>1</td></tr>
+                <tr><td>2</td><td>Cabo USB</td><td>1</td></tr>
+                <tr><td>1</td><td>Software (sketch)</td><td>1</td></tr>
+                <tr><td>2</td><td>Notebook c/ Arduino IDE</td><td>1</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <small class="text-muted">Use esta visão para discutir planejamento por níveis no MRP.</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEQUENCIAMENTO LÓGICO -->
+  <section id="sequenciamento" class="mb-5 fade-unit">
+    <div class="d-flex align-items-center mb-3">
+      <span class="step-dot me-2">2</span>
+      <h2 class="m-0">Sequenciamento lógico (quadro → fluxo) 🔄</h2>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="card p-3">
+          <h6 class="text-uppercase text-muted mb-2">Quadro de etapas & recursos</h6>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead><tr><th>Fase</th><th>Etapa</th><th>T(min)</th><th>% do total</th><th>Pessoas</th><th>Máquinas/Ferramentas</th></tr></thead>
+              <tbody>
+                <!-- tempo total = 50 min -->
+                <tr><td>A</td><td>Conferir kit</td><td>4</td><td>8%</td><td>1 Aux.</td><td>—</td></tr>
+                <tr><td>B</td><td>Montar HC-SR04</td><td>5</td><td>10%</td><td>1 Mont.</td><td>Breadboard</td></tr>
+                <tr><td>C</td><td>Montar LEDs</td><td>8</td><td>16%</td><td>1 Mont.</td><td>Resistores</td></tr>
+                <tr><td>D</td><td>Montar buzzer</td><td>3</td><td>6%</td><td>1 Mont.</td><td>—</td></tr>
+                <tr><td>E</td><td>Revisão elétrica (CQ#1)</td><td>4</td><td>8%</td><td>1 Verif.</td><td>Multímetro</td></tr>
+                <tr><td>F</td><td>Upload do sketch</td><td>7</td><td>14%</td><td>1 Prog.</td><td>IDE Arduino</td></tr>
+                <tr><td>G</td><td>Teste funcional (CQ#2)</td><td>8</td><td>16%</td><td>1 Verif.</td><td>Régua/objeto</td></tr>
+                <tr><td>H</td><td>Calibração</td><td>6</td><td>12%</td><td>1 Prog.</td><td>Notebook</td></tr>
+                <tr><td>I</td><td>Validação final (CQ)</td><td>5</td><td>10%</td><td>1 Líder</td><td>Planilha/registro</td></tr>
+              </tbody>
+              <tfoot>
+                <tr class="table-primary">
+                  <th colspan="2" class="text-end">Tempo total</th>
+                  <th>50</th><th>100%</th><th colspan="2"></th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fluxo com fade -->
+      <div class="col-lg-6">
+        <div class="card p-3">
+          <h6 class="text-uppercase text-muted mb-2">Fluxo interativo (fade)</h6>
+          <div id="flowBox" class="p-3 border rounded-4 bg-white">
+            <div id="flowStep" class="fade-swap show">
+              <div class="h5 mb-1">A → Conferir kit</div>
+              <p class="mb-2">Separe e confira todos os componentes (BOM). Se algo faltar, <b>pare</b> e sinalize.</p>
+              <span class="mini-chip">Pré-requisito: nenhum</span>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between mt-3">
+            <button id="prevBtn" class="btn btn-outline-secondary btn-pill" disabled>⬅️ Anterior</button>
+            <button id="nextBtn" class="btn btn-primary btn-pill">Próximo ➡️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUALIDADE -->
+  <section id="qualidade" class="mb-5 fade-unit">
+    <div class="d-flex align-items-center mb-3">
+      <span class="step-dot me-2">3</span>
+      <h2 class="m-0">Controles de Qualidade (CQ) 🧪✅</h2>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="card p-3">
+          <h6 class="text-uppercase text-muted mb-2">CQ intermediários</h6>
+          <ul class="mb-0">
+            <li><strong>CQ#1 — Revisão elétrica:</strong> polaridade dos LEDs, resistores, continuidade GND/5V.</li>
+            <li><strong>CQ#2 — Teste funcional:</strong> a ≤ 10 cm → LED vermelho + buzzer; a > 10 cm → LED verde.</li>
+            <li><strong>Calibração:</strong> confirmar distância real com régua; ajustar constante <span class="kbd">distancia_carro</span> no sketch.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card p-3">
+          <h6 class="text-uppercase text-muted mb-2">CQ final</h6>
+          <ul class="mb-0">
+            <li>Executar 5 ciclos de aproximação (20 cm → 5 cm) e registrar o comportamento.</li>
+            <li>Aprovação: 5/5 ciclos corretos, sem falso-positivo por 10 s na posição “livre”.</li>
+            <li>Documentar versão do código, data, equipe e ajustes de calibração.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checklist de verificação -->
+    <div class="card p-3 mt-3">
+      <h6 class="text-uppercase text-muted mb-2">Checklist de verificação (usar em bancada)</h6>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr>
+              <th>CQ</th>
+              <th>Testes físicos</th>
+              <th>Testes lógicos</th>
+              <th>Critério de aceitação</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>CQ#1 — Revisão elétrica</strong></td>
+              <td>LEDs com polaridade correta; resistores em série; continuidade 5V e GND (multímetro)</td>
+              <td>Nenhum aquecimento anormal; sem reset ao mover cabos</td>
+              <td>Todos os pontos OK; sem curto; IDE reconhece a porta</td>
+              <td><input type="checkbox" aria-label="CQ1 ok"></td>
+            </tr>
+            <tr>
+              <td><strong>CQ#2 — Teste funcional</strong></td>
+              <td>Medições a 5, 10 e 20 cm com régua; repetir 3 vezes</td>
+              <td>≤10 cm: LED vermelho + buzzer; >10 cm: LED verde</td>
+              <td>100% dos casos conforme regra de distância</td>
+              <td><input type="checkbox" aria-label="CQ2 ok"></td>
+            </tr>
+            <tr>
+              <td><strong>Calibração</strong></td>
+              <td>Ambiente sem eco excessivo; sensor perpendicular ao alvo</td>
+              <td>Ajuste de <code>distancia_carro</code>; tolerância ±1 cm</td>
+              <td>Após ajuste, leituras estáveis em 5 medidas</td>
+              <td><input type="checkbox" aria-label="Calibracao ok"></td>
+            </tr>
+            <tr>
+              <td><strong>CQ Final</strong></td>
+              <td>5 ciclos 20→5 cm sem falhas; cabos firmes</td>
+              <td>Comportamento esperado em cada ciclo; registro em planilha</td>
+              <td>5/5 ciclos corretos; sem falso-positivo por 10 s</td>
+              <td><input type="checkbox" aria-label="CQ final ok"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONSOLIDAÇÃO -->
+  <section id="consolidado" class="mb-5 fade-unit">
+    <div class="d-flex align-items-center mb-3">
+      <span class="step-dot me-2">4</span>
+      <h2 class="m-0">Consolidação das etapas (quadro resumo) 📋</h2>
+    </div>
+    <div class="card p-3">
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr><th>Fase</th><th>Etapa</th><th>Tempo</th><th>Recursos</th><th>Controle</th><th>Saída</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>A</td><td>Conferir kit</td><td>4 min</td><td>Aux., lista BOM</td><td>Checklist</td><td>Kit validado</td></tr>
+            <tr><td>B</td><td>Montar HC-SR04</td><td>5 min</td><td>Montador</td><td>Inspeção visual</td><td>Sensor conectado</td></tr>
+            <tr><td>C</td><td>Montar LEDs</td><td>8 min</td><td>Montador + resistores</td><td>Polaridade OK</td><td>LEDs prontos</td></tr>
+            <tr><td>D</td><td>Montar buzzer</td><td>3 min</td><td>Montador</td><td>Inspeção visual</td><td>Buzzer pronto</td></tr>
+            <tr><td>E</td><td>Revisão elétrica</td><td>4 min</td><td>Verificador + multímetro</td><td class="qual-mid">CQ#1</td><td>Placa validada</td></tr>
+            <tr><td>F</td><td>Upload do sketch</td><td>7 min</td><td>Programador</td><td>Compilação OK</td><td>Firmware gravado</td></tr>
+            <tr><td>G</td><td>Teste funcional</td><td>8 min</td><td>Verificador</td><td class="qual-mid">CQ#2</td><td>Comportamento correto</td></tr>
+            <tr><td>H</td><td>Calibração</td><td>6 min</td><td>Programador</td><td>Regra 10 cm</td><td>Limiar ajustado</td></tr>
+            <tr><td>I</td><td>Validação final</td><td>5 min</td><td>Líder</td><td class="qual-final">CQ Final</td><td>Projeto aprovado</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- MRP & CUSTOS -->
+  <section id="mrp" class="mb-5 fade-unit">
+    <div class="d-flex align-items-center mb-3">
+      <span class="step-dot me-2">5</span>
+      <h2 class="m-0">MRP simplificado + Custos 💸</h2>
+    </div>
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="card p-3">
+          <h6 class="text-uppercase text-muted mb-2">BOM (Nível 0–1)</h6>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead><tr><th>Item</th><th>Nível</th><th>Qtde</th><th>Lead time</th><th>Custo unit.</th><th>Custo total</th></tr></thead>
+              <tbody>
+                <tr><td>Conjunto “Sensor Estac.”</td><td>0</td><td>1</td><td>—</td><td>—</td><td>—</td></tr>
+                <tr><td>Arduino Uno</td><td>1</td><td>1</td><td>3 d</td><td>R$ 95,00</td><td>R$ 95,00</td></tr>
+                <tr><td>HC-SR04</td><td>1</td><td>1</td><td>4 d</td><td>R$ 15,00</td><td>R$ 15,00</td></tr>
+                <tr><td>Buzzer 5V</td><td>1</td><td>1</td><td>4 d</td><td>R$ 6,00</td><td>R$ 6,00</td></tr>
+                <tr><td>LED vermelho</td><td>1</td><td>1</td><td>—</td><td>R$ 1,50</td><td>R$ 1,50</td></tr>
+                <tr><td>LED verde</td><td>1</td><td>1</td><td>—</td><td>R$ 1,50</td><td>R$ 1,50</td></tr>
+                <tr><td>Resistores 220–330Ω</td><td>1</td><td>2</td><td>—</td><td>R$ 0,40</td><td>R$ 0,80</td></tr>
+                <tr><td>Breadboard</td><td>1</td><td>1</td><td>—</td><td>R$ 20,00</td><td>R$ 20,00</td></tr>
+                <tr><td>Jumpers (kit)</td><td>1</td><td>1</td><td>—</td><td>R$ 8,00</td><td>R$ 8,00</td></tr>
+                <tr><td>Cabo USB</td><td>1</td><td>1</td><td>—</td><td>R$ 12,00</td><td>R$ 12,00</td></tr>
+              </tbody>
+              <tfoot><tr><th colspan="5" class="text-end">Subtotal materiais</th><th>R$ 160,80</th></tr></tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card p-3">
+          <h6 class="text-uppercase text-muted mb-2">Mão de obra & desenvolvimento</h6>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead><tr><th>Atividade</th><th>Tempo</th><th>Perfil</th><th>Custo/h</th><th>Custo</th></tr></thead>
+              <tbody>
+                <tr><td>Montagem do circuito</td><td>25 min</td><td>Montador(a)</td><td>R$ 30,00</td><td>R$ 12,50</td></tr>
+                <tr><td>Upload & ajustes do código</td><td>20 min</td><td>Programador(a)</td><td>R$ 45,00</td><td>R$ 15,00</td></tr>
+                <tr><td>Testes e calibração</td><td>15 min</td><td>Verificador(a)</td><td>R$ 30,00</td><td>R$ 7,50</td></tr>
+              </tbody>
+              <tfoot><tr><th colspan="4" class="text-end">Subtotal mão de obra</th><th>R$ 35,00</th></tr></tfoot>
+            </table>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span>Total estimado por conjunto (materiais + MO):</span>
+            <span class="fw-bold">R$ 195,80</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Planejamento de liberação -->
+    <div class="row g-3 mt-1">
+      <div class="col-lg-12">
+        <div class="card p-3">
+          <h6 class="text-uppercase text-muted mb-2">MRP (planejamento de liberação)</h6>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead><tr><th>Item</th><th>Necess. bruta</th><th>Estoque</th><th>Receb. programado</th><th>Lote</th><th>Lead time</th><th>Liberação planejada</th><th>Recebimento planejado</th></tr></thead>
+              <tbody>
+                <tr><td>Arduino Uno</td><td>10</td><td>0</td><td>—</td><td>10</td><td>3 d</td><td>Seg 9h</td><td>Qui 9h</td></tr>
+                <tr><td>HC-SR04</td><td>10</td><td>5</td><td>—</td><td>10</td><td>4 d</td><td>Seg 9h</td><td>Sex 9h</td></tr>
+                <tr><td>Buzzer 5V</td><td>10</td><td>0</td><td>—</td><td>10</td><td>4 d</td><td>Seg 9h</td><td>Sex 9h</td></tr>
+                <tr><td>LEDs (V+R)</td><td>20</td><td>50</td><td>—</td><td>—</td><td>0 d</td><td>—</td><td>—</td></tr>
+                <tr><td>Resistores</td><td>20</td><td>100</td><td>—</td><td>—</td><td>0 d</td><td>—</td><td>—</td></tr>
+                <tr><td>Breadboard</td><td>10</td><td>10</td><td>—</td><td>—</td><td>0 d</td><td>—</td><td>—</td></tr>
+                <tr><td>Jumpers (kits)</td><td>10</td><td>10</td><td>—</td><td>—</td><td>0 d</td><td>—</td><td>—</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <section class="fade-unit">
+    <div class="card border-0 p-4">
+      <h3 class="fw-bold">Por que entender o passo a passo importa? 🌱</h3>
+      <p class="mb-0">Ao decompor em fases, estimar tempos e identificar pontos de controle, você reduz retrabalho, antecipa gargalos e garante qualidade. Este exercício conecta teoria e prática em um “produto” com cliente claro: o motorista que precisa de sinalização confiável.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="py-4 mt-4 border-top">
+  <div class="container d-flex flex-wrap align-items-center justify-content-between">
+    <span class="text-muted">Material didático para aula de PPCP • Sensor de Estacionamento</span>
+    <span class="text-muted">Bootstrap + efeitos fade em JS</span>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  /* Fade-in on scroll */
+  const observers = document.querySelectorAll('.fade-unit');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('show'); io.unobserve(e.target);} })
+  },{threshold:.12});
+  observers.forEach(el=>io.observe(el));
+
+  /* Fluxo com fade */
+  const steps=[
+    {t:'A → Conferir kit',d:'Separe e confira todos os componentes (BOM). Se algo faltar, <b>pare</b> e sinalize.',p:'Pré-requisito: nenhum'},
+    {t:'B → Montar HC-SR04',d:'Conecte Vcc, GND, Trig(D3), Echo(D2).',p:'Pré-requisito: A'},
+    {t:'C → Montar LEDs',d:'Instale LEDs com resistores; verde em D7, vermelho em D8.',p:'Pré-requisito: B'},
+    {t:'D → Montar buzzer',d:'Positivo no D9; negativo no GND.',p:'Pré-requisito: C'},
+    {t:'E → Revisão elétrica (CQ#1)',d:'Cheque polaridades e continuidade com multímetro.',p:'Pré-requisito: D'},
+    {t:'F → Upload do sketch',d:'Abra o .ino, confirme pinos e faça upload.',p:'Pré-requisito: E'},
+    {t:'G → Teste funcional (CQ#2)',d:'≤10 cm: LED vermelho + buzzer; >10 cm: LED verde.',p:'Pré-requisito: F'},
+    {t:'H → Calibração',d:'Ajuste <code>distancia_carro</code> e repita testes.',p:'Pré-requisito: G'},
+    {t:'I → Validação final (CQ)',d:'5 ciclos sem erro; documente versão e ajustes.',p:'Pré-requisito: H'}
+  ];
+  let idx=0; const flowStep=document.getElementById('flowStep');
+  const prevBtn=document.getElementById('prevBtn'); const nextBtn=document.getElementById('nextBtn');
+  function renderStep(i){
+    const s=steps[i]; flowStep.classList.remove('show');
+    setTimeout(()=>{
+      flowStep.innerHTML=`<div class="h5 mb-1">${s.t}</div><p class="mb-2">${s.d}</p><span class="mini-chip">${s.p}</span>`;
+      flowStep.classList.add('show'); prevBtn.disabled=(i===0);
+      nextBtn.textContent=(i===steps.length-1)?'Concluir ✅':'Próximo ➡️';
+    },220);
+  }
+  nextBtn.addEventListener('click',()=>{ if(idx<steps.length-1){ idx++; renderStep(idx);} else { nextBtn.disabled=true; }});
+  prevBtn.addEventListener('click',()=>{ if(idx>0){ idx--; renderStep(idx); nextBtn.disabled=false; }});
+</script>
+</body>
+</html>
