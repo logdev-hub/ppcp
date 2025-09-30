@@ -33,6 +33,12 @@
     .kbd{background:#0b3c74;color:#fff;padding:.2rem .45rem;border-radius:.4rem;font-size:.85rem}
     /* espaçamento após navbar fixa */
     .nav-space{padding-top:4.25rem;}
+
+    /* -------- NAVBAR (tamanhos alinhados ao controles.html) -------- */
+    .navbar-brand{font-weight:800;}
+    @media (min-width:992px){ .navbar-brand{font-size:1.05rem;} }
+    @media (max-width:991.98px){ .navbar-brand{font-size:1rem;} }
+    .navbar .nav-link{font-size:.95rem;}
   </style>
 </head>
 <body class="nav-space">
@@ -40,7 +46,7 @@
 <!-- NAVBAR (fixa e responsiva) -->
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
   <div class="container">
-    <a class="navbar-brand fw-bold text-primary" fs-4 href="#">
+    <a class="navbar-brand text-primary fw-bold" href="#">
       PPCP • Sensor de Estacionamento
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Alternar navegação">
@@ -514,4 +520,3 @@
 </script>
 </body>
 </html>
-
