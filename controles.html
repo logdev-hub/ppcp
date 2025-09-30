@@ -1,0 +1,1002 @@
+<!doctype html>
+<html lang="pt-br" data-bs-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PPCP — Gantt (deps) + PERT Fullscreen + Troubleshooting + 5S</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --brand: #1e88e5;
+  --crit: #e53935;
+  --soft: #f6fbff;
+  --ink: #0b3c74;
+  --rowH: 40px;
+  --axisH: 22px;
+  --trackH: 28px;
+}
+
+html, body {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: var(--soft);
+  scroll-behavior: smooth;
+}
+
+.step-dot{
+    width:36px;
+    height:36px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    background:var(--brand);
+    color:#fff;
+    font-weight:800}
+
+/* Hero Section - REMOVIDO STICKY PARA NÃO FIXAR */
+.hero {
+  background: linear-gradient(135deg, rgba(30,136,229,.12), rgba(0,191,166,.10));
+  border-bottom: 1px solid #e6f0ff;
+  /* position: sticky; REMOVIDO - NÃO FIXAR AO ROLAR */
+  top: 0;
+  z-index: 1000;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+/* Navigation */
+.nav-pills .nav-link {
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+}
+
+.nav-pills .nav-link.active {
+  background: var(--brand);
+  color: white;
+}
+
+/* Cards */
+.card {
+  border: 0;
+  box-shadow: 0 8px 24px rgba(10,50,100,.08);
+  border-radius: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(10,50,100,.12);
+}
+
+/* Fade Animation */
+.fade-unit {
+  opacity: 0;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+  transform: translateY(20px);
+}
+
+.fade-unit.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Image Frame */
+.img-frame {
+  border-radius: 1rem;
+  border: 1px solid #e9f2fb;
+  box-shadow: 0 4px 12px rgba(0,0,0,.05);
+}
+
+/* Gantt Chart - CORREÇÃO TOTAL DO ALINHAMENTO */
+.gantt-wrap {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,.05);
+  overflow-x: auto;
+}
+
+.gantt {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 0;
+  min-width: 100%;
+}
+
+.g-left {
+  border-right: 1px solid #e9f2fb;
+  padding-right: 12px;
+  position: sticky;
+  left: 0;
+  background: white;
+  z-index: 10;
+}
+
+.g-right {
+  position: relative;
+  padding-left: 12px;
+  min-width: 100%;
+}
+
+.g-spacer {
+  height: var(--axisH);
+}
+
+.g-row {
+  display: flex;
+  align-items: center;
+  height: var(--rowH);
+  padding: 0 8px;
+  border-bottom: 1px solid #f0f7ff;
+  position: relative;
+}
+
+.g-activity {
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.92rem;
+  width: 100%;
+  padding-right: 8px;
+}
+
+.g-track {
+  position: relative;
+  height: 33px;
+  /*height: var(--trackH);*/
+  margin: calc((var(--rowH) - var(--trackH)) / 2) 0;
+  background: #f1f7ff;
+  border-radius: 999px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.g-bar {
+  position: absolute;
+  height: 18px;
+  top: calc((var(--trackH) - 18px) / 2);
+  border-radius: 999px;
+  background: linear-gradient(90deg, #9ecbff, #66c7ff);
+  box-shadow: 0 2px 8px rgba(30,136,229,.25);
+  transition: transform 0.2s ease;
+  left: 0;
+  width: 0;
+}
+
+.g-bar.critical {
+  background: linear-gradient(90deg, #ffa6a6, #ff6b6b);
+  outline: 2px solid #ffd7d7;
+}
+
+.g-bar:hover {
+  transform: scaleY(1.2);
+  z-index: 1;
+}
+
+.g-axis {
+  position: relative;
+  height: var(--axisH);
+  margin-bottom: 8px;
+  background: #f8fcff;
+  border-bottom: 1px solid #e9f2fb;
+}
+
+.g-tick {
+  position: absolute;
+  height: 100%;
+  border-left: 1px dashed #d7e9ff;
+  color: #6a7f95;
+  font-size: 0.75rem;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  padding-left: 4px;
+  z-index: 5;
+}
+
+/* PERT Chart */
+.pert-wrap {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,.05);
+}
+
+.pert-board {
+  border: 1px dashed #e6f0ff;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  min-height: 400px;
+  background: #fafcff;
+}
+
+.pert-viewport {
+  transform-origin: 0 0;
+  display: inline-block;
+  cursor: grab;
+  transition: transform 0.2s ease;
+}
+
+.pert-viewport:active {
+  cursor: grabbing;
+}
+
+svg.pert {
+  width: 100%;
+  height: auto;
+  max-width: none;
+}
+
+.node {
+  fill: #fff;
+  stroke: #90caf9;
+  stroke-width: 2;
+  transition: stroke 0.2s ease;
+}
+
+.node.critical {
+  stroke: #ef5350;
+  stroke-width: 3;
+}
+
+.n-label {
+  font-weight: 700;
+  fill: var(--ink);
+  font-size: 1.1rem;
+}
+
+.n-time {
+  font-size: 0.85rem;
+  fill: #546e7a;
+}
+
+.edge {
+  stroke: #90a4ae;
+  stroke-width: 2;
+  marker-end: url(#arrow);
+  transition: stroke 0.2s ease;
+}
+
+.edge.critical {
+  stroke: #ef5350;
+  stroke-width: 3;
+  marker-end: url(#arrowRed);
+}
+
+.ghost {
+  stroke-dasharray: 4 4;
+  stroke: #b0bec5;
+}
+
+.zoombar {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+/* Kanban */
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.kb-col {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  min-height: 320px;
+  border: 1px solid #eaf3ff;
+  display: flex;
+  flex-direction: column;
+}
+
+.kb-header {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f0f7ff;
+}
+
+.kb-drop {
+  flex: 1;
+  min-height: 240px;
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  background: #f9fcff;
+  transition: background 0.2s ease;
+}
+
+.kb-drop:hover {
+  background: #f0f8ff;
+}
+
+.kb-card {
+  user-select: none;
+  cursor: grab;
+  background: #f7fbff;
+  border: 1px solid #dcecff;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.kb-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 8px rgba(30,136,229,.15);
+}
+
+/* Tables */
+.table thead th {
+  background: #e8f3ff;
+  color: var(--ink);
+  font-weight: 700;
+  border-bottom: 2px solid #c5e1ff;
+}
+
+.table tbody tr:hover {
+  background-color: #f8fcff;
+}
+
+/* 5S Tabs */
+.nav-tabs .nav-link {
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #546e7a;
+  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 0;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-tabs .nav-link:hover {
+  color: var(--brand);
+  border-bottom-color: var(--brand);
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--brand);
+  border-bottom-color: var(--brand);
+  background: transparent;
+}
+
+.tab-content {
+  border-top: 1px solid #eaf3ff;
+}
+
+/* Footer */
+footer {
+  background: #fff;
+  box-shadow: 0 -4px 12px rgba(0,0,0,.03);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 991.98px) {
+  .gantt {
+    grid-template-columns: 1fr;
+  }
+  
+  .g-left {
+    border-right: none;
+    border-bottom: 1px solid #e9f2fb;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .g-right {
+    padding-left: 0;
+  }
+  
+  .hero {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  
+  .hero .d-flex {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .hero nav {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .kanban {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .step-dot {
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+  }
+  
+  .nav-tabs .nav-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .zoombar {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .zoombar input[type="range"] {
+    width: 120px;
+  }
+}
+</style>
+</head>
+<body>
+<header class="hero py-3 mb-4"> <!-- REMOVIDO STICKY -->
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div>
+        <span class="badge text-bg-primary-subtle border border-primary-subtle fs-6">PPCP</span>
+      </div>
+      <nav class="d-flex flex-wrap gap-2 justify-content-center">
+        <a class="btn btn-outline-primary btn-sm" href="#gantt">Gantt</a>
+        <a class="btn btn-outline-primary btn-sm" href="#pert">PERT/CPM</a>
+        <a class="btn btn-outline-primary btn-sm" href="#kanban">Kanban</a>
+        <a class="btn btn-outline-primary btn-sm" href="#troubleshoot">Troubleshooting</a>
+        <a class="btn btn-primary btn-sm" href="#fiveS">5S</a>
+      </nav>
+    </div>
+    <div class="row align-items-center mt-4">
+      <div class="col-lg-7">
+        <h1 class="fw-bold text-primary mb-3">Sensor de Estacionamento 🚗🔊</h1>
+        <p class="lead mb-3">Controles de processos (ferramentas)</p>
+        <div class="d-flex flex-wrap align-items-center gap-3">
+          <div class="text-muted">Total planejado: <strong>50 min</strong></div>
+          <div class="text-muted">Caminho crítico: <span class="text-danger fw-semibold">B → C → F → G → I</span></div>
+        </div>
+      </div>
+      <div class="col-lg-5 mt-3 mt-lg-0">
+        <img src="esquematico.png" class="img-fluid img-frame" alt="Esquemático do circuito" loading="lazy">
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="container pb-5">
+
+<!-- =================== GANTT =================== -->
+<section id="gantt" class="gantt-wrap mb-5">
+  <div class="d-flex align-items-center mb-4">
+    <span class="step-dot me-2">1</span>
+    <h2 class="m-0">Gráfico de Gantt com Dependências ⏱️</h2>
+  </div>
+  <div class="gantt">
+    <!-- Coluna esquerda: nomes -->
+    <div class="g-left" id="gLeft">
+      <div class="g-spacer"></div>
+    </div>
+
+    <!-- Coluna direita: eixo + trilhas -->
+    <div class="g-right">
+      <div class="g-axis" id="gAxis"></div>
+      <div id="gTracks"></div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== PERT/CPM =================== -->
+<section id="pert" class="mb-5 fade-unit">
+  <div class="d-flex align-items-center mb-3">
+    <span class="step-dot me-2">1.1</span>
+    <h2 class="m-0">Rede PERT/CPM — paralelos & caminho crítico 🔺</h2>
+    <button class="btn btn-outline-primary btn-sm ms-auto" data-bs-toggle="modal" data-bs-target="#pertModal">Tela cheia</button>
+  </div>
+  <div class="pert-wrap">
+    <div class="d-flex justify-content-between flex-wrap align-items-center mb-3">
+      <div class="small text-muted">Arraste para mover • Use o zoom</div>
+      <div class="zoombar">
+        <button class="btn btn-outline-secondary btn-sm" id="zoomOut">−</button>
+        <input type="range" id="zoom" min="50" max="1000" value="300" class="flex-grow-1">
+        <button class="btn btn-outline-secondary btn-sm" id="zoomIn">+</button>
+        <button class="btn btn-outline-primary btn-sm" id="zoomFit">Ajustar</button>
+      </div>
+    </div>
+    <div id="pertBoard" class="pert-board">
+      <div id="pertViewport" class="pert-viewport"></div>
+    </div>
+  </div>
+</section>
+
+<!-- MODAL FULLSCREEN PERT -->
+<div class="modal fade" id="pertModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Rede PERT/CPM — Tela cheia</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body p-2">
+        <div class="d-flex justify-content-end p-2">
+          <div class="zoombar">
+            <button class="btn btn-outline-secondary btn-sm" id="mZoomOut">−</button>
+            <input type="range" id="mZoom" min="50" max="1000" value="350" class="flex-grow-1">
+            <button class="btn btn-outline-secondary btn-sm" id="mZoomIn">+</button>
+            <button class="btn btn-outline-primary btn-sm" id="mZoomFit">Ajustar</button>
+          </div>
+        </div>
+        <div id="modalBoard" class="pert-board" style="height:calc(100vh - 140px)">
+          <div id="modalViewport" class="pert-viewport"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =================== KANBAN =================== -->
+<section id="kanban" class="mb-5 fade-unit">
+  <div class="d-flex align-items-center mb-3">
+    <span class="step-dot me-2">2</span>
+    <h2 class="m-0">Kanban 🗂️</h2>
+  </div>
+  <div class="kanban">
+    <div class="kb-col">
+      <div class="kb-header">
+        <h6 class="mb-0">📝 A Fazer <span class="text-muted" id="cnt-todo"></span></h6>
+      </div>
+      <div class="kb-drop" id="todo"></div>
+    </div>
+    <div class="kb-col">
+      <div class="kb-header">
+        <h6 class="mb-0">⚙️ Fazendo <span class="text-muted" id="cnt-doing"></span></h6>
+      </div>
+      <div class="kb-drop" id="doing"></div>
+    </div>
+    <div class="kb-col">
+      <div class="kb-header">
+        <h6 class="mb-0">✅ Feito <span class="text-muted" id="cnt-done"></span></h6>
+      </div>
+      <div class="kb-drop" id="done"></div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== TROUBLESHOOTING =================== -->
+<section id="troubleshoot" class="mb-5 fade-unit">
+  <div class="d-flex align-items-center mb-3">
+    <span class="step-dot me-2">3</span>
+    <h2 class="m-0">Troubleshooting rápido 🔧</h2>
+  </div>
+  <div class="card p-4">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th scope="col">Sintoma</th>
+            <th scope="col">Causa provável</th>
+            <th scope="col">Teste/Verificação</th>
+            <th scope="col">Correção</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>LED não acende</td><td>Polaridade invertida / resistor ausente</td><td>Checar anodo/cátodo; medir pino</td><td>Inverter LED; inserir 220–330Ω</td></tr>
+          <tr><td>LED sempre aceso</td><td>Pino em INPUT/ruído; curto na breadboard</td><td>Ver <code>pinMode</code>; pull-down</td><td>Definir OUTPUT; refazer ligação</td></tr>
+          <tr><td>Buzzer contínuo</td><td>Limiar de distância mal calibrado</td><td>Objeto a >10 cm; Serial Monitor</td><td>Ajustar <code>distancia_carro</code></td></tr>
+          <tr><td>HC-SR04 lê 0 cm</td><td>Trig/Echo trocados; GND/5V ausentes</td><td>Checar D3/D2 e 5V</td><td>Corrigir fios; GND comum</td></tr>
+          <tr><td>Leitura instável</td><td>Ecos/ambiente; cabos frouxos</td><td>Testar outras superfícies; balançar cabos</td><td>Fixar sensor; reorganizar jumpers</td></tr>
+          <tr><td>Upload falha</td><td>Porta errada; Serial ocupada</td><td>Tools→Port; fechar apps serial</td><td>Selecionar porta; reset</td></tr>
+          <tr><td>Arduino reinicia</td><td>Curto no 5V; buzzers ativos</td><td>Medir 5V durante toque</td><td>Rever ligações; buzzer passivo</td></tr>
+          <tr><td>Som muito baixo</td><td>Pino incorreto / driver ausente</td><td>Testar no D9 com tom</td><td>Driver transistor ou troca buzzer</td></tr>
+          <tr><td>Echo sempre alto</td><td>Pino flutuando / ruído</td><td>Serial plotter</td><td>Pull-down 100k no Echo</td></tr>
+          <tr><td>IDE não reconhece placa</td><td>Driver ausente / cabo ruim</td><td>Trocar USB; gerenciador</td><td>Driver CH340/ATmega; novo cabo</td></tr>
+          <tr><td>Medida errática >2 m</td><td>Limite HC-SR04/objeto estreito</td><td>Alvo plano 50–150 cm</td><td>Operar na faixa útil</td></tr>
+          <tr><td>LEDs piscam sem objeto</td><td>Ruído no 5V/USB</td><td>Medir ripple; outra porta</td><td>Power bank/porta estável</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- =================== 5S (separado) =================== -->
+<section id="fiveS" class="mb-5 fade-unit">
+  <div class="d-flex align-items-center mb-3">
+    <span class="step-dot me-2">4</span>
+    <h2 class="m-0">Programa 5S da bancada 🧹</h2>
+  </div>
+
+  <ul class="nav nav-tabs mb-0" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#s1" type="button" role="tab">Seiri — Utilização</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#s2" type="button" role="tab">Seiton — Ordenação</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#s3" type="button" role="tab">Seiso — Limpeza</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#s4" type="button" role="tab">Seiketsu — Padronização</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#s5" type="button" role="tab">Shitsuke — Disciplina</button>
+    </li>
+  </ul>
+
+  <div class="tab-content card p-4 border-top-0 rounded-top-0">
+    <div class="tab-pane fade show active" id="s1" role="tabpanel">
+      <h6 class="mb-3">Checklist</h6>
+      <ul class="list-unstyled">
+        <li class="mb-2"><input type="checkbox" class="form-check-input me-2"> Apenas itens da etapa atual sobre a mesa.</li>
+        <li class="mb-2"><input type="checkbox" class="form-check-input me-2"> Separar e remover danificados.</li>
+        <li class="mb-2"><input type="checkbox" class="form-check-input me-2"> Excedentes guardados em caixas rotuladas.</li>
+      </ul>
+      <p class="text-muted small">Seiri elimina o desnecessário e reduz o tempo de busca. A bancada “enxuta” diminui erros.</p>
+      <p class="text-muted small">Regra prática: manter só o que será usado nos próximos 10–15 min.</p>
+    </div>
+    <div class="tab-pane fade" id="s2" role="tabpanel">
+      <h6 class="mb-3">Checklist</h6>
+      <ul class="list-unstyled">
+        <li class="mb-2"><input type="checkbox" class="form-check-input me-2"> Bandejas: HC-SR04, LEDs, resistores, jumpers.</li>
+        <li class="mb-2"><input type="checkbox" class="form-check-input me-2"> Cabos organizados com velcro; nada tensionando.</li>
+        <li class="mb-2"><input type="checkbox" class="form-check-input me-2"> Cores padrão (vermelho=5V, preto=GND).</li>
+      </ul>
+      <p class="text-muted small">Seiton define “cada coisa em seu lugar”. Endereçar e rotular agiliza a montagem e evita reconexões erradas.</p>
+      <p class="text-muted small">O ganho é imediato: menos interrupções, mais foco.</p>
+    </div>
+    <div class="tab-pane fade" id="s3" role="tabpanel">
+      <h6 class="mb-3">Checklist</h6>
+      <ul class="list-unstyled">
+        <li class="mb-2"><input type="checkbox" class="form-check-input me-2"> Remover sobras de fio e resíduos a cada ciclo.</li>
+        <li class="mb-2"><input type="checkbox" class="form-check-input me-2"> Limpar breadboard com pincel antiestático.</li>
+        <li class="mb-2"><input type="checkbox" class="form-check-input me-2"> Desenergizar USB antes de limpar.</li>
+      </ul>
+      <p class="text-muted small">Seiso mantém limpo para detectar anomalias. Resíduos metálicos geram curtos intermitentes.</p>
+      <p class="text-muted small">Faça micro-pausas de 1 min entre etapas para limpeza rápida.</p>
+    </div>
+    <div class="tab-pane fade" id="s4" role="tabpanel">
+      <h6 class="mb-3">Checklist</h6>
+      <ul class="list-unstyled">
+        <li class="mb-2"><input type="checkbox" class="form-check-input me-2"> Foto “montagem OK” visível.</li>
+        <li class="mb-2"><input type="checkbox" class="form-check-input me-2"> Checklists (CQ e 5S) impressos por equipe.</li>
+        <li class="mb-2"><input type="checkbox" class="form-check-input me-2"> Pinos e sketch documentados (D2/D3/D7/D8/D9).</li>
+      </ul>
+      <p class="text-muted small">Seiketsu sustenta o padrão com gestão visual. Reduz variação entre equipes.</p>
+      <p class="text-muted small">Documentação curta e atualizada é mais usada — e previne improvisos.</p>
+    </div>
+    <div class="tab-pane fade" id="s5" role="tabpanel">
+      <h6 class="mb-3">Checklist</h6>
+      <ul class="list-unstyled">
+        <li class="mb-2"><input type="checkbox" class="form-check-input me-2"> Cronometrista valida checklists antes de avançar.</li>
+        <li class="mb-2"><input type="checkbox" class="form-check-input me-2"> Retrospectiva de 2 min ao final.</li>
+        <li class="mb-2"><input type="checkbox" class="form-check-input me-2"> Kit devolvido completo e limpo.</li>
+      </ul>
+      <p class="text-muted small">Shitsuke transforma boas práticas em hábito por disciplina coletiva.</p>
+      <p class="text-muted small">A cadência de revisão fixa o método mesmo com turmas grandes.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="py-4 mt-4 border-top">
+  <div class="container d-flex flex-wrap align-items-center justify-content-between">
+    <span class="text-muted">PPCP • Gantt+Deps • PERT Fullscreen • Kanban • Troubleshooting • 5S</span>
+
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* Fade-in com Intersection Observer */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('show');
+      io.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-unit').forEach(el => io.observe(el));
+
+/* ====================== Dados do plano ====================== */
+const acts = [
+  {id:'A',name:'Conferir kit',dur:4,deps:[],         crit:false, row:0},
+  {id:'B',name:'Montar HC-SR04',dur:5,deps:['A'],    crit:true,  row:1},
+  {id:'C',name:'Montar LEDs',dur:8,deps:['B'],       crit:true,  row:2},
+  {id:'D',name:'Montar buzzer (paralelo a C)',dur:3,deps:['B'],crit:false,row:3},
+  {id:'E',name:'Revisão elétrica',dur:4,deps:['C'],  crit:false, row:4},
+  {id:'F',name:'Upload do sketch',dur:7,deps:['E'],  crit:true,  row:5},
+  {id:'G',name:'Teste funcional',dur:8,deps:['F'],   crit:true,  row:6},
+  {id:'H',name:'Calibração (paralelo a I)',dur:6,deps:['G'],crit:false,row:7},
+  {id:'I',name:'Validação final',dur:5,deps:['G'],   crit:true,  row:8},
+];
+const total = 50;
+
+/* ====================== Gantt: cálculo de início (ES) ====================== */
+const map = new Map(acts.map(a => [a.id, a]));
+function earliestStart(a) {
+  if (!a.deps.length) return 0;
+  return Math.max(...a.deps.map(d => earliestStart(map.get(d)) + map.get(d).dur));
+}
+acts.forEach(a => a.start = earliestStart(a));
+
+/* ====================== Gantt: render ====================== */
+const left = document.getElementById('gLeft');
+const axis = document.getElementById('gAxis');
+const tracks = document.getElementById('gTracks');
+
+left.innerHTML = '<div class="g-spacer"></div>';
+tracks.innerHTML = '';
+axis.innerHTML = '';
+
+// Eixo de tempo
+for (let m = 0; m <= total; m += 5) {
+  const t = document.createElement('div');
+  t.className = 'g-tick';
+  t.style.left = (m / total * 100) + '%';
+  t.textContent = m === 0 ? '0' : m;
+  axis.appendChild(t);
+}
+
+// Linhas + barras
+acts.forEach(a => {
+  const r = document.createElement('div');
+  r.className = 'g-row';
+  r.innerHTML = `<div class="g-activity">${a.id} • ${a.name} (${a.dur}m)</div>`;
+  left.appendChild(r);
+
+  const tr = document.createElement('div');
+  tr.className = 'g-track';
+  const bar = document.createElement('div');
+  bar.className = 'g-bar' + (a.crit ? ' critical' : '');
+  // Posicionamento absoluto com % baseado no total
+  bar.style.left = (a.start / total * 100) + '%';
+  bar.style.width = (a.dur / total * 100) + '%';
+  tr.appendChild(bar);
+  tracks.appendChild(tr);
+});
+
+/* ====================== PERT: SVG builder ====================== */
+function buildPERTSVG() {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'pert');
+  svg.setAttribute('viewBox', '0 0 2400 800');
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  svg.innerHTML = `
+  <defs>
+    <marker id="arrow" markerWidth="14" markerHeight="14" refX="12" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L12,4 L0,8 z" fill="#90a4ae"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="14" markerHeight="14" refX="12" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L12,4 L0,8 z" fill="#ef5350"/>
+    </marker>
+  </defs>
+  <!-- Coluna 1 -->
+  <g transform="translate(80,360)">
+    <rect class="node" x="0" y="0" rx="12" ry="12" width="220" height="100"/>
+    <text class="n-label" x="110" y="38" text-anchor="middle">A (4m)</text>
+    <text class="n-time" x="110" y="65" text-anchor="middle">Conferir kit</text>
+  </g>
+  <!-- Coluna 2 -->
+  <g transform="translate(380,360)">
+    <rect class="node critical" x="0" y="0" rx="12" ry="12" width="220" height="100"/>
+    <text class="n-label" x="110" y="38" text-anchor="middle">B (5m)</text>
+    <text class="n-time" x="110" y="65" text-anchor="middle">HC-SR04</text>
+  </g>
+  <!-- Coluna 3 (paralelos) -->
+  <g transform="translate(760,200)">
+    <rect class="node critical" x="0" y="0" rx="12" ry="12" width="220" height="100"/>
+    <text class="n-label" x="110" y="38" text-anchor="middle">C (8m)</text>
+    <text class="n-time" x="110" y="65" text-anchor="middle">LEDs</text>
+  </g>
+  <g transform="translate(760,520)">
+    <rect class="node" x="0" y="0" rx="12" ry="12" width="220" height="100"/>
+    <text class="n-label" x="110" y="38" text-anchor="middle">D (3m)</text>
+    <text class="n-time" x="110" y="65" text-anchor="middle">Buzzer</text>
+  </g>
+  <!-- Coluna 4 -->
+  <g transform="translate(1120,200)">
+    <rect class="node" x="0" y="0" rx="12" ry="12" width="260" height="100"/>
+    <text class="n-label" x="130" y="38" text-anchor="middle">E (4m)</text>
+    <text class="n-time" x="130" y="65" text-anchor="middle">Revisão elétrica</text>
+  </g>
+  <!-- Coluna 5 -->
+  <g transform="translate(1520,200)">
+    <rect class="node critical" x="0" y="0" rx="12" ry="12" width="260" height="100"/>
+    <text class="n-label" x="130" y="38" text-anchor="middle">F (7m)</text>
+    <text class="n-time" x="130" y="65" text-anchor="middle">Upload sketch</text>
+  </g>
+  <!-- Coluna 6 -->
+  <g transform="translate(1920,120)">
+    <rect class="node critical" x="0" y="0" rx="12" ry="12" width="260" height="100"/>
+    <text class="n-label" x="130" y="38" text-anchor="middle">G (8m)</text>
+    <text class="n-time" x="130" y="65" text-anchor="middle">Teste funcional</text>
+  </g>
+  <g transform="translate(1920,380)">
+    <rect class="node" x="0" y="0" rx="12" ry="12" width="260" height="100"/>
+    <text class="n-label" x="130" y="38" text-anchor="middle">H (6m)</text>
+    <text class="n-time" x="130" y="65" text-anchor="middle">Calibração</text>
+  </g>
+  <!-- Coluna 7 -->
+  <g transform="translate(1920,600)">
+    <rect class="node critical" x="0" y="0" rx="12" ry="12" width="260" height="100"/>
+    <text class="n-label" x="130" y="38" text-anchor="middle">I (5m)</text>
+    <text class="n-time" x="130" y="65" text-anchor="middle">Validação final</text>
+  </g>
+
+  <!-- Arestas -->
+  <line class="edge" x1="300" y1="410" x2="380" y2="410"/>
+  <path class="edge critical" d="M600,410 C680,320 700,300 760,250"/>
+  <path class="edge" d="M600,410 C680,500 700,520 760,570"/>
+  <line class="edge" x1="980" y1="250" x2="1120" y2="250"/>
+  <path class="edge ghost" d="M980,570 C1100,480 1100,300 1120,250"/>
+  <line class="edge critical" x1="1380" y1="250" x2="1520" y2="250"/>
+  <path class="edge critical" d="M1780,250 C1880,220 1880,170 1920,170"/>
+  <path class="edge" d="M1780,250 C1880,300 1880,430 1920,430"/>
+  <path class="edge critical" d="M2050,220 C2100,320 2100,660 2050,650"/>
+  <path class="edge ghost" d="M2050,480 C2065,530 2065,590 2050,600"/>
+  `;
+  return svg;
+}
+
+const pertViewport = document.getElementById('pertViewport');
+pertViewport.appendChild(buildPERTSVG());
+
+/* PERT zoom + pan (seção principal) */
+const pv = pertViewport, board = document.getElementById('pertBoard');
+const zoom = document.getElementById('zoom'), zIn = document.getElementById('zoomIn'), zOut = document.getElementById('zoomOut'), zFit = document.getElementById('zoomFit');
+
+function setScale(v) {
+  pv.style.transform = `scale(${v/100})`;
+}
+
+zoom.addEventListener('input', e => setScale(+e.target.value));
+zIn.onclick = () => { 
+  zoom.value = Math.min(1000, +zoom.value + 50); 
+  setScale(+zoom.value); 
+};
+zOut.onclick = () => { 
+  zoom.value = Math.max(50, +zoom.value - 50); 
+  setScale(+zoom.value); 
+};
+zFit.onclick = () => {
+  const vb = pv.querySelector('svg').viewBox.baseVal;
+  const s = Math.max(0.5, Math.min(10, (board.clientWidth - 20) / vb.width));
+  zoom.value = Math.round(s * 100);
+  setScale(+zoom.value);
+};
+
+// Pan
+let down = false, sx, lx;
+pv.addEventListener('mousedown', e => {
+  down = true;
+  sx = e.pageX;
+  lx = board.scrollLeft;
+  pv.style.cursor = 'grabbing';
+});
+document.addEventListener('mouseup', () => {
+  down = false;
+  pv.style.cursor = 'grab';
+});
+document.addEventListener('mousemove', e => {
+  if (!down) return;
+  board.scrollLeft = lx - (e.pageX - sx);
+});
+
+/* Modal PERT */
+const modal = document.getElementById('pertModal');
+modal.addEventListener('shown.bs.modal', () => {
+  const mvp = document.getElementById('modalViewport');
+  mvp.innerHTML = '';
+  mvp.appendChild(buildPERTSVG());
+  
+  const mb = document.getElementById('modalBoard');
+  const mZoom = document.getElementById('mZoom');
+  const mIn = document.getElementById('mZoomIn'), 
+        mOut = document.getElementById('mZoomOut'), 
+        mFit = document.getElementById('mZoomFit');
+  
+  function mSet(v) {
+    mvp.style.transform = `scale(${v/100})`;
+  }
+  
+  mZoom.addEventListener('input', e => mSet(+e.target.value));
+  mIn.onclick = () => { 
+    mZoom.value = Math.min(1000, +mZoom.value + 50); 
+    mSet(+mZoom.value); 
+  };
+  mOut.onclick = () => { 
+    mZoom.value = Math.max(50, +mZoom.value - 50); 
+    mSet(+mZoom.value); 
+  };
+  mFit.onclick = () => {
+    const vb = mvp.querySelector('svg').viewBox.baseVal;
+    const s = Math.max(0.5, Math.min(10, (mb.clientWidth - 20) / vb.width));
+    mZoom.value = Math.round(s * 100);
+    mSet(+mZoom.value);
+  };
+  
+  // Pan no modal
+  let d = false, x0, l0;
+  mvp.addEventListener('mousedown', e => {
+    d = true;
+    x0 = e.pageX;
+    l0 = mb.scrollLeft;
+    mvp.style.cursor = 'grabbing';
+  });
+  document.addEventListener('mouseup', () => {
+    d = false;
+    mvp.style.cursor = 'grab';
+  });
+  document.addEventListener('mousemove', e => {
+    if (!d) return;
+    mb.scrollLeft = l0 - (e.pageX - x0);
+  });
+});
+
+/* ====================== Kanban ====================== */
+const tasks = acts.map(a => `${a.id} • ${a.name}`);
+const todo = document.getElementById('todo'), 
+      doing = document.getElementById('doing'), 
+      done = document.getElementById('done');
+
+tasks.forEach(t => {
+  const d = document.createElement('div');
+  d.className = 'kb-card';
+  d.draggable = true;
+  d.textContent = t;
+  todo.appendChild(d);
+});
+
+function enableDnD() {
+  let drag = null;
+  
+  document.querySelectorAll('.kb-card').forEach(c => {
+    c.addEventListener('dragstart', () => {
+      drag = c;
+      setTimeout(() => c.style.opacity = '0.6', 0);
+    });
+    
+    c.addEventListener('dragend', () => {
+      drag = null;
+      c.style.opacity = '1';
+      counters();
+    });
+  });
+  
+  [todo, doing, done].forEach(col => {
+    col.addEventListener('dragover', e => {
+      e.preventDefault();
+      col.style.background = '#eef7ff';
+    });
+    
+    col.addEventListener('dragleave', () => {
+      col.style.background = '';
+    });
+    
+    col.addEventListener('drop', e => {
+      e.preventDefault();
+      col.style.background = '';
+      if (drag) col.appendChild(drag);
+      counters();
+    });
+  });
+}
+
+function counters() {
+  document.getElementById('cnt-todo').textContent = '(' + todo.children.length + ')';
+  document.getElementById('cnt-doing').textContent = '(' + doing.children.length + ')';
+  document.getElementById('cnt-done').textContent = '(' + done.children.length + ')';
+}
+
+enableDnD();
+counters();
+</script>
+</body>
+</html>
