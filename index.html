@@ -31,9 +31,37 @@
     .mini-chip{border:1px dashed #9ecbff;background:#f2f8ff;padding:.15rem .5rem;border-radius:.75rem;font-size:.85rem}
     .img-frame{border-radius:1rem;border:1px solid #e9f2fb}
     .kbd{background:#0b3c74;color:#fff;padding:.2rem .45rem;border-radius:.4rem;font-size:.85rem}
+    /* espaçamento após navbar fixa */
+    .nav-space{padding-top:4.25rem;}
   </style>
 </head>
-<body>
+<body class="nav-space">
+
+<!-- NAVBAR (fixa e responsiva) -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-primary" href="#">
+      PPCP • Sensor de Estacionamento
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Alternar navegação">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+        <li class="nav-item"><a class="nav-link" href="#passoapasso">Passo a passo</a></li>
+        <li class="nav-item"><a class="nav-link" href="#arvore">Árvore</a></li>
+        <li class="nav-item"><a class="nav-link" href="#sequenciamento">Sequenciamento</a></li>
+        <li class="nav-item"><a class="nav-link" href="#qualidade">Qualidade</a></li>
+        <li class="nav-item"><a class="nav-link" href="#mrp">MRP & Custos</a></li>
+        <li class="nav-item ms-lg-3">
+          <a class="btn btn-primary btn-sm" href="controles.html">Controles</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
 <header class="hero py-4 mb-4">
   <div class="container">
     <div class="d-flex align-items-center justify-content-between">
@@ -41,13 +69,6 @@
         <span class="badge badge-soft me-2">PPCP</span>
         <span class="badge bg-success-subtle text-success">Didático</span>
       </div>
-      <nav class="d-flex gap-2">
-        <a class="btn btn-outline-primary btn-sm btn-pill" href="#passoapasso">Passo a passo</a>
-        <a class="btn btn-outline-primary btn-sm btn-pill" href="#arvore">Árvore</a>
-        <a class="btn btn-outline-primary btn-sm btn-pill" href="#sequenciamento">Sequenciamento</a>
-        <a class="btn btn-outline-primary btn-sm btn-pill" href="#qualidade">Qualidade</a>
-        <a class="btn btn-primary btn-sm btn-pill" href="#mrp">MRP & Custos</a>
-      </nav>
     </div>
 
     <div class="row align-items-center mt-4">
@@ -61,7 +82,6 @@
         </div>
       </div>
       <div class="col-lg-5">
-        <!-- caminho ajustado -->
         <img src="esquematico.png" class="img-fluid img-frame fade-unit" alt="Esquemático do circuito">
       </div>
     </div>
@@ -120,7 +140,7 @@
     </div>
   </section>
 
-  <!-- ÁRVORE DE PRODUTO (entre Passo a passo e Sequenciamento) -->
+  <!-- ÁRVORE DE PRODUTO -->
   <section id="arvore" class="mb-5 fade-unit">
     <div class="d-flex align-items-center mb-3">
       <span class="step-dot me-2">1.1</span>
@@ -137,35 +157,19 @@
               <span class="badge bg-primary">Nível 0</span>
               <strong class="ms-1">Conjunto: Sensor de Estacionamento</strong> 🚗🔊
               <ul class="list-unstyled ps-4 mt-2">
-                <li class="mb-2">
-                  <span class="badge bg-info-subtle text-info">Nível 1</span>
-                  Arduino Uno R3 + cabo USB (1 un)
-                </li>
-                <li class="mb-2">
-                  <span class="badge bg-info-subtle text-info">Nível 1</span>
-                  Sensor ultrassônico HC-SR04 (1 un)
-                </li>
-                <li class="mb-2">
-                  <span class="badge bg-info-subtle text-info">Nível 1</span>
-                  Buzzer passivo 5V (1 un)
-                </li>
+                <li class="mb-2"><span class="badge bg-info-subtle text-info">Nível 1</span> Arduino Uno R3 + cabo USB (1 un)</li>
+                <li class="mb-2"><span class="badge bg-info-subtle text-info">Nível 1</span> Sensor ultrassônico HC-SR04 (1 un)</li>
+                <li class="mb-2"><span class="badge bg-info-subtle text-info">Nível 1</span> Buzzer passivo 5V (1 un)</li>
                 <li class="mb-2">
                   <span class="badge bg-info-subtle text-info">Nível 1</span>
                   Sinalização por LEDs (subconjunto)
                   <ul class="list-unstyled ps-4 mt-2">
-                    <li>
-                      <span class="badge bg-success-subtle text-success">Nível 2</span>
-                      LED vermelho (1 un) + Resistor 220–330Ω (1 un)
-                    </li>
-                    <li class="mt-1">
-                      <span class="badge bg-success-subtle text-success">Nível 2</span>
-                      LED verde (1 un) + Resistor 220–330Ω (1 un)
-                    </li>
+                    <li><span class="badge bg-success-subtle text-success">Nível 2</span> LED vermelho (1 un) + Resistor 220–330Ω (1 un)</li>
+                    <li class="mt-1"><span class="badge bg-success-subtle text-success">Nível 2</span> LED verde (1 un) + Resistor 220–330Ω (1 un)</li>
                   </ul>
                 </li>
                 <li class="mb-2">
-                  <span class="badge bg-info-subtle text-info">Nível 1</span>
-                  Interligação e montagem
+                  <span class="badge bg-info-subtle text-info">Nível 1</span> Interligação e montagem
                   <ul class="list-unstyled ps-4 mt-2">
                     <li><span class="badge bg-success-subtle text-success">Nível 2</span> Breadboard (1 un)</li>
                     <li class="mt-1"><span class="badge bg-success-subtle text-success">Nível 2</span> Jumpers macho–macho (1 kit)</li>
@@ -233,7 +237,6 @@
             <table class="table table-sm align-middle">
               <thead><tr><th>Fase</th><th>Etapa</th><th>T(min)</th><th>% do total</th><th>Pessoas</th><th>Máquinas/Ferramentas</th></tr></thead>
               <tbody>
-                <!-- tempo total = 50 min -->
                 <tr><td>A</td><td>Conferir kit</td><td>4</td><td>8%</td><td>1 Aux.</td><td>—</td></tr>
                 <tr><td>B</td><td>Montar HC-SR04</td><td>5</td><td>10%</td><td>1 Mont.</td><td>Breadboard</td></tr>
                 <tr><td>C</td><td>Montar LEDs</td><td>8</td><td>16%</td><td>1 Mont.</td><td>Resistores</td></tr>
@@ -471,7 +474,7 @@
 <footer class="py-4 mt-4 border-top">
   <div class="container d-flex flex-wrap align-items-center justify-content-between">
     <span class="text-muted">Material didático para aula de PPCP • Sensor de Estacionamento</span>
-    <span class="text-muted">Bootstrap + efeitos fade em JS</span>
+    <span class="text-muted">Leandro Pereira</span>
   </div>
 </footer>
 
